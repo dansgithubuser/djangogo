@@ -109,12 +109,22 @@ ALLOWED_HOSTS = [
 ]\
 '''
 		).format(heroku_url),
+		(
+'''\
+INSTALLED_APPS = [\
+'''
+		): (
+'''\
+INSTALLED_APPS = [
+    {}.apps.{}\
+'''
+		).format(args.name, args.name.capitalize()+'Config'),
 		'DEBUG = True': 'DEBUG = False',
 	},
 	os.path.join(project, 'settings.py'),
 )
 #settings_debug.py
-invoke('cp', os.path.join(DIR, 'settings_debug.py'), '.')
+invoke('cp', os.path.join(DIR, 'settings_debug.py'), project)
 #=====go.py=====#
 def literalify(string): return "'"+string+"'"
 find_replace_copy(
