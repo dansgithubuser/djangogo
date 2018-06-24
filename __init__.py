@@ -1,6 +1,7 @@
 from collections import defaultdict
 import argparse
 import os
+import re
 import subprocess
 import sys
 import time
@@ -16,7 +17,6 @@ def make_parser():
 	parser.add_argument('--database-server-start', '--db', action='store_true')
 	parser.add_argument('--database-server-stop', action='store_true')
 	parser.add_argument('--migrate', action='store_true')
-	parser.add_argument('--deploy-setup', action='store_true')
 	parser.add_argument('--deploy', '-d', action='store_true')
 	parser.add_argument('--log', '-l', action='store_true')
 	parser.add_argument('--run', '-r', action='store_true')
@@ -24,9 +24,12 @@ def make_parser():
 	parser.add_argument('--browser', '-b', action='store_true')
 	return parser
 
-def invoke(*args):
-	print('invoking {}'.format(args))
-	subprocess.check_call(args)
+def invoke(*args, **kwargs):
+	print('invoking `{}` in {}'.format(' '.join(args), os.getcwd()))
+	if kwargs.get('stdout', False):
+		return subprocess.check_output(args).decode()
+	else:
+		subprocess.check_call(args)
 
 def postgres(*args): invoke('sudo', '-i', '-u', 'postgres', *args)
 def psql(*args): postgres('psql', *args)
@@ -36,26 +39,26 @@ def psqla(name, value, user): psqlc("ALTER ROLE {} SET {} TO '{}';".format(user,
 def create_database(database): psqlc('CREATE DATABASE {}'.format(database))
 def drop_database(database): psqlc('DROP DATABASE {}'.format(database))
 
-def create_user(user):
-	psqlc("CREATE USER map_database_user WITH PASSWORD 'dev-password';")
+def create_user(database, user):
+	psqlc("CREATE USER {} WITH PASSWORD 'dev-password';".format(user))
 	psqla('client_encoding', 'utf8', user)
 	psqla('default_transaction_isolation', 'read committed', user)
 	psqla('timezone', 'UTC', user)
-	psqlc('GRANT ALL PRIVILEGES ON DATABASE map_database TO map_database_user;')
+	psqlc('GRANT ALL PRIVILEGES ON DATABASE {} TO {};'.format(database, user))
 
 def drop_user(user): psqlc('DROP USER {}'.format(user))
 
-def main(args, project, app, database, user, heroku_repo, heroku_url):
+def main(args, project, app, database, user, heroku_url):
 	if args.create_database: create_database(database)
 	if args.drop_database: drop_database(database)
-	if args.create_user: create_user(user)
+	if args.create_user: create_user(database, user)
 	if args.drop_user: drop_user(user)
 	
 	if args.database_freshen:
 		drop_database(database)
 		drop_user(user)
 		create_database(database)
-		create_user(user)
+		create_user(database, user)
 	
 	if args.database_server_start:
 		invoke('sudo', 'systemctl', 'start', 'postgresql@10-main')
@@ -66,9 +69,6 @@ def main(args, project, app, database, user, heroku_repo, heroku_url):
 	if args.migrate:
 		invoke('python3', 'manage.py', 'makemigrations', app)
 		invoke('python3', 'manage.py', 'migrate')
-	
-	if args.deploy_setup:
-		invoke('git', 'remote', 'add', 'heroku', heroku_repo)
 	
 	if args.deploy:
 		invoke('python3', 'manage.py', 'check', '--deploy')
