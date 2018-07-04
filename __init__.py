@@ -20,7 +20,7 @@ def make_parser():
 	parser.add_argument('--deploy', '-d', action='store_true')
 	parser.add_argument('--log', '-l', action='store_true')
 	parser.add_argument('--run', '-r', action='store_true')
-	parser.add_argument('--heroku-psql', action='store_true')
+	parser.add_argument('--heroku-psql', '-s', action='store_true')
 	parser.add_argument('--browser', '-b', action='store_true')
 	return parser
 
