@@ -116,7 +116,7 @@ INSTALLED_APPS = [\
 		): (
 '''\
 INSTALLED_APPS = [
-    {}.apps.{}\
+    '{}.apps.{}',\
 '''
 		).format(args.name, args.name.capitalize()+'Config'),
 		'DEBUG = True': 'DEBUG = False',
