@@ -119,6 +119,18 @@ INSTALLED_APPS = [
     '{}.apps.{}',\
 '''
 		).format(args.name, args.name.capitalize()+'Config'),
+		(
+'''\
+MIDDLEWARE = [\
+'''
+		): (
+'''\
+if os.environ.get('DJANGOGO_ENV', None) == 'local':
+    INSTALLED_APPS.append('django_extensions')
+
+MIDDLEWARE = [\
+'''
+		).format(args.name, args.name.capitalize()+'Config'),
 		'DEBUG = True': 'DEBUG = False',
 	},
 	os.path.join(project, 'settings.py'),

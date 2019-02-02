@@ -22,6 +22,7 @@ def make_parser():
 	parser.add_argument('--run', '-r', action='store_true')
 	parser.add_argument('--heroku-psql', '-s', action='store_true')
 	parser.add_argument('--browser', '-b', action='store_true')
+	parser.add_argument('--show-urls', '-u', action='store_true')
 	return parser
 
 def invoke(*args, **kwargs):
@@ -49,6 +50,8 @@ def create_user(database, user):
 def drop_user(user): psqlc('DROP USER {}'.format(user))
 
 def main(args, project, app, database, user, heroku_url):
+	os.environ['DJANGOGO_ENV']='local'
+
 	if args.create_database: create_database(database)
 	if args.drop_database: drop_database(database)
 	if args.create_user: create_user(database, user)
@@ -86,3 +89,6 @@ def main(args, project, app, database, user, heroku_url):
 	
 	if args.browser:
 		webbrowser.open_new_tab(heroku_url)
+
+	if args.show_urls:
+		invoke('python3', 'manage.py', 'show_urls')
