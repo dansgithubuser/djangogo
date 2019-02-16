@@ -17,8 +17,8 @@ parser=argparse.ArgumentParser()
 parser.add_argument('name')
 args=parser.parse_args()
 project=args.name+'_proj'
-database=args.name+'_database'
-user=args.name+'_user'
+database=args.name.lower()+'_database'
+user=args.name.lower()+'_user'
 
 #=====bookkeeping=====#
 start=os.getcwd()
