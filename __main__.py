@@ -2,6 +2,7 @@ from __init__ import *
 import argparse
 import os
 import re
+import shutil
 import subprocess
 
 DIR=os.path.dirname(os.path.realpath(__file__))
@@ -37,13 +38,13 @@ find_replace_copy(
 	'Procfile',
 )
 #app.json
-invoke('cp', os.path.join(DIR, 'app.json'), '.')
+shutil.copy(os.path.join(DIR, 'app.json'), '.')
 #Pipfile
-invoke('cp', os.path.join(DIR, 'Pipfile'), '.')
+shutil.copy(os.path.join(DIR, 'Pipfile'), '.')
 invoke('pipenv', '--three')
 invoke('pipenv', 'install')
 #create
-stdout=invoke('heroku', 'create', stdout=True)
+stdout=invoke('heroku', 'create', stdout=True, shell=True)
 heroku_url, heroku_repo=re.search(r'(.+) \| (.+)\n', stdout).groups()
 heroku_app=re.search('https://([^.]+)', heroku_url).group(1)
 #=====django=====#
@@ -136,7 +137,7 @@ MIDDLEWARE = [\
 	os.path.join(project, 'settings.py'),
 )
 #settings_debug.py
-invoke('cp', os.path.join(DIR, 'settings_debug.py'), project)
+shutil.copy(os.path.join(DIR, 'settings_debug.py'), project)
 #=====go.py=====#
 def literalify(string): return "'"+string+"'"
 find_replace_copy(
@@ -151,9 +152,9 @@ find_replace_copy(
 	'go.py',
 )
 #=====git=====#
-invoke('cp', os.path.join(DIR, '.gitignore'), '.')
+shutil.copy(os.path.join(DIR, '.gitignore'), '.')
 invoke('git', 'init', '.')
-invoke('mkdir', 'deps')
+os.mkdir('deps')
 invoke('git', 'submodule', 'add', 'https://github.com/dansgithubuser/djangogo', 'deps/djangogo')
 invoke('git', 'add', '.')
 invoke('git', 'commit', '-m', 'initial commit created by djangogo '+commit+(' with diff' if diff else ''))

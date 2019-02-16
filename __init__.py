@@ -27,10 +27,13 @@ def make_parser():
 
 def invoke(*args, **kwargs):
 	print('invoking `{}` in {}'.format(' '.join(args), os.getcwd()))
+	shell=kwargs.get('shell', False)
+	if shell:
+		args=' '.join(args)
 	if kwargs.get('stdout', False):
-		return subprocess.check_output(args).decode()
+		return subprocess.check_output(args, shell=shell).decode()
 	else:
-		subprocess.check_call(args)
+		subprocess.check_call(args, shell=shell)
 
 def psqlc(command): invoke('psql', 'postgres', '-c', command)
 def psqla(name, value, user): psqlc("ALTER ROLE {} SET {} TO '{}';".format(user, name, value))
