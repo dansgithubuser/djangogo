@@ -20,6 +20,9 @@ project=args.name+'_proj'
 database=args.name.lower()+'_database'
 user=args.name.lower()+'_user'
 
+#create heroku app with given name, or fail now if it's taken
+heroku_create_stdout=invoke('heroku', 'create', args.name, stdout=True, shell=True)
+
 #=====bookkeeping=====#
 start=os.getcwd()
 os.chdir(DIR)
@@ -44,8 +47,7 @@ shutil.copy(os.path.join(DIR, 'Pipfile'), '.')
 invoke('pipenv', '--three')
 invoke('pipenv', 'install')
 #create
-stdout=invoke('heroku', 'create', stdout=True, shell=True)
-heroku_url, heroku_repo=re.search(r'(.+) \| (.+)\n', stdout).groups()
+heroku_url, heroku_repo=re.search(r'(.+) \| (.+)\n', heroku_create_stdout).groups()
 heroku_app=re.search('https://([^.]+)', heroku_url).group(1)
 #=====django=====#
 #app
