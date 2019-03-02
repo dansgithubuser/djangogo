@@ -35,7 +35,7 @@ def invoke(*args, **kwargs):
 	else:
 		subprocess.check_call(args, shell=shell)
 
-def psqlc(command): invoke('psql', 'postgres', '-c', command)
+def psqlc(command): invoke('psql', '-c', command, 'postgres')
 def psqla(name, value, user): psqlc("ALTER ROLE {} SET {} TO '{}';".format(user, name, value))
 
 def create_database(database): psqlc('CREATE DATABASE {}'.format(database))
