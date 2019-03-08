@@ -119,16 +119,6 @@ ALLOWED_HOSTS = [
 		).format(heroku_url),
 		(
 '''\
-INSTALLED_APPS = [\
-'''
-		): (
-'''\
-INSTALLED_APPS = [
-    '{}.apps.{}',\
-'''
-		).format(args.name, args.name.capitalize()+'Config'),
-		(
-'''\
 MIDDLEWARE = [\
 '''
 		): (
