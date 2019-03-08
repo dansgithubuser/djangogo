@@ -101,10 +101,9 @@ X_FRAME_OPTIONS = 'DENY'
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 
-try:
+if os.environ.get('DJANGOGO_ENV') != 'local':
     import django_heroku
-    django_heroku.settings(locals())
-except Exception as e: print(e)\
+    django_heroku.settings(locals())\
 '''
 		),
 		(
