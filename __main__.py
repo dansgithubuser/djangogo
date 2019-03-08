@@ -13,15 +13,20 @@ def find_replace_copy(src, find_replace, dst):
 		contents=contents.replace(find, replace)
 	with open(dst, 'w') as file: file.write(contents)
 
+def lower_kebab_case(s): return s.lower().replace('_', '-')
+def snake_case(s): return s.replace('-', '_')
+def lower_snake_case(s): return snake_case(s.lower())
+
 parser=argparse.ArgumentParser()
 parser.add_argument('name')
 args=parser.parse_args()
-project=args.name+'_proj'
-database=args.name.lower()+'_database'
-user=args.name.lower()+'_user'
+project=snake_case(args.name)+'_proj'
+app=snake_case(args.name)+'_app'
+database=lower_snake_case(args.name)+'_database'
+user=lower_snake_case(args.name)+'_user'
 
 #create heroku app with given name, or fail now if it's taken
-heroku_create_stdout=invoke('heroku', 'create', args.name, stdout=True, shell=True)
+heroku_create_stdout=invoke('heroku', 'create', lower_kebab_case(args.name), stdout=True, shell=True)
 
 #=====bookkeeping=====#
 start=os.getcwd()
@@ -51,7 +56,7 @@ heroku_url, heroku_repo=re.search(r'(.+) \| (.+)\n', heroku_create_stdout).group
 heroku_app=re.search('https://([^.]+)', heroku_url).group(1)
 #=====django=====#
 #app
-invoke('python3', 'manage.py', 'startapp', args.name)
+invoke('python3', 'manage.py', 'startapp', app)
 #settings.py
 find_replace_copy(
 	os.path.join(project, 'settings.py'),
@@ -133,7 +138,7 @@ if os.environ.get('DJANGOGO_ENV', None) == 'local':
 
 MIDDLEWARE = [\
 '''
-		).format(args.name, args.name.capitalize()+'Config'),
+		),
 		'DEBUG = True': 'DEBUG = False',
 	},
 	os.path.join(project, 'settings.py'),
@@ -146,7 +151,7 @@ find_replace_copy(
 	os.path.join(DIR, 'go.py'),
 	{
 		'{project}'   : literalify(project),
-		'{app}'       : literalify(args.name),
+		'{app}'       : literalify(app),
 		'{database}'  : literalify(database),
 		'{user}'      : literalify(user),
 		'{heroku_url}': literalify(heroku_url),
