@@ -16,6 +16,7 @@ def find_replace_copy(src, find_replace, dst):
 def lower_kebab_case(s): return s.lower().replace('_', '-')
 def snake_case(s): return s.replace('-', '_')
 def lower_snake_case(s): return snake_case(s.lower())
+def camel_case(s): return s.title().replace(' ', '')
 
 parser=argparse.ArgumentParser()
 parser.add_argument('name')
@@ -117,6 +118,16 @@ ALLOWED_HOSTS = [
 ]\
 '''
 		).format(heroku_url),
+		(
+'''\
+INSTALLED_APPS = [\
+'''
+		): (
+'''\
+INSTALLED_APPS = [
+    '{}.apps.{}',\
+'''
+		).format(app, camel_case(app)+'Config'),
 		(
 '''\
 MIDDLEWARE = [\
