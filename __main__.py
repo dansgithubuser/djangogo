@@ -18,13 +18,41 @@ def snake_case(s): return s.replace('-', '_')
 def lower_snake_case(s): return snake_case(s.lower())
 def camel_case(s): return s.title().replace(' ', '')
 
-parser=argparse.ArgumentParser()
-parser.add_argument('name')
+parser=make_parser()
+parser.add_argument('--create', dest='name')
 args=parser.parse_args()
+
+if not args.name:
+	def find_folder_with(file_name):
+		for i in os.listdir('.'):
+			if os.path.isdir(i):
+				if os.path.exists(os.path.join(i, file_name)):
+					return i
+	project=find_folder_with('settings.py')
+	app=find_folder_with('apps.py')
+	sys.path.append(project)
+	import settings
+	database=settings.DATABASES['default']
+	try:
+		heroku_info=invoke('heroku', 'info', '-s', stdout=True, shell=True, quiet=True)
+	except subprocess.CalledProcessError as e:
+		heroku_info=''
+	match=re.search('web_url=(.*)', heroku_info)
+	heroku_url=match and match.group(1) or None
+	main(args,
+		project=project,
+		app=app,
+		db_name=database['NAME'],
+		db_user=database['USER'],
+		heroku_url=heroku_url,
+		db_password=database['PASSWORD'],
+	)
+	sys.exit()
+
 project=snake_case(args.name)+'_proj'
 app=snake_case(args.name)+'_app'
-database=lower_snake_case(args.name)+'_database'
-user=lower_snake_case(args.name)+'_user'
+db_name=lower_snake_case(args.name)+'_database'
+db_user=lower_snake_case(args.name)+'_user'
 
 #create heroku app with given name, or fail now if it's taken
 heroku_create_stdout=invoke('heroku', 'create', lower_kebab_case(args.name), stdout=True, shell=True)
@@ -80,7 +108,7 @@ find_replace_copy(
         'PORT': '5432',
     }}\
 '''
-		).format(database, user, database.upper()),
+		).format(db_name, db_user, db_name.upper()),
 		(
 '''\
 STATIC_URL = '/static/'\
@@ -152,8 +180,8 @@ find_replace_copy(
 	{
 		'{project}'   : literalify(project),
 		'{app}'       : literalify(app),
-		'{database}'  : literalify(database),
-		'{user}'      : literalify(user),
+		'{db_name}'   : literalify(db_name),
+		'{db_user}'   : literalify(db_user),
 		'{heroku_url}': literalify(heroku_url),
 	},
 	'go.py',

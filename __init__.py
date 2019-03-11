@@ -24,7 +24,8 @@ def make_parser():
 	return parser
 
 def invoke(*args, **kwargs):
-	print('invoking `{}` in {}'.format(' '.join(args), os.getcwd()))
+	if not kwargs.get('quiet'):
+		print('invoking `{}` in {}'.format(' '.join(args), os.getcwd()))
 	shell=kwargs.get('shell', False)
 	if shell:
 		args=' '.join(args)
@@ -36,11 +37,11 @@ def invoke(*args, **kwargs):
 def psqlc(command): invoke('psql', '-c', command, 'postgres')
 def psqla(name, value, user): psqlc("ALTER ROLE {} SET {} TO '{}';".format(user, name, value))
 
-def create_database(database): psqlc('CREATE DATABASE {}'.format(database))
-def drop_database(database): psqlc('DROP DATABASE {}'.format(database))
+def create_database(name): psqlc('CREATE DATABASE {}'.format(name))
+def drop_database(name): psqlc('DROP DATABASE {}'.format(name))
 
-def create_user(database, user):
-	psqlc("CREATE USER {} WITH PASSWORD 'dev-password';".format(user))
+def create_user(database, user, password='dev-password'):
+	psqlc("CREATE USER {} WITH PASSWORD '{}';".format(user, password))
 	psqla('client_encoding', 'utf8', user)
 	psqla('default_transaction_isolation', 'read committed', user)
 	psqla('timezone', 'UTC', user)
@@ -48,19 +49,19 @@ def create_user(database, user):
 
 def drop_user(user): psqlc('DROP USER {}'.format(user))
 
-def main(args, project, app, database, user, heroku_url):
+def main(args, project, app, db_name, db_user, heroku_url, db_password='dev-password'):
 	os.environ['DJANGOGO_ENV']='local'
 
-	if args.create_database: create_database(database)
-	if args.drop_database: drop_database(database)
-	if args.create_user: create_user(database, user)
-	if args.drop_user: drop_user(user)
+	if args.create_database: create_database(db_name)
+	if args.drop_database: drop_database(db_name)
+	if args.create_user: create_user(db_name, db_user)
+	if args.drop_user: drop_user(db_user)
 	
 	if args.database_freshen:
-		drop_database(database)
-		drop_user(user)
-		create_database(database)
-		create_user(database, user)
+		drop_database(db_name)
+		drop_user(db_user)
+		create_database(db_name)
+		create_user(db_name, db_user, db_password)
 	
 	if args.migrate:
 		invoke('python3', 'manage.py', 'makemigrations', app)
@@ -69,16 +70,16 @@ def main(args, project, app, database, user, heroku_url):
 	if args.deploy:
 		invoke('python3', 'manage.py', 'check', '--deploy')
 		invoke('git', 'push', '-f', 'heroku', 'master')
-		invoke('heroku', 'run', 'python', 'manage.py', 'migrate')
+		invoke('heroku', 'run', 'python', 'manage.py', 'migrate', shell=True)
 	
 	if args.log:
-		invoke('heroku', 'logs', '--tail')
+		invoke('heroku', 'logs', '--tail', shell=True)
 	
 	if args.run:
 		invoke('python3', 'manage.py', 'runserver', '--settings', project+'.settings_debug')
 	
 	if args.heroku_psql:
-		invoke('heroku', 'pg:psql')
+		invoke('heroku', 'pg:psql', shell=True)
 	
 	if args.browser:
 		webbrowser.open_new_tab(heroku_url)
