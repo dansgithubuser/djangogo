@@ -25,7 +25,7 @@ def make_parser():
 
 def invoke(*args, **kwargs):
 	if not kwargs.get('quiet'):
-		print('invoking `{}` in {}'.format(' '.join(args), os.getcwd()))
+		print('invoking {} in {}'.format(args, os.getcwd()))
 	shell=kwargs.get('shell', False)
 	if shell:
 		args=' '.join(args)
@@ -54,7 +54,7 @@ def main(args, project, app, db_name, db_user, heroku_url, db_password='dev-pass
 
 	if args.create_database: create_database(db_name)
 	if args.drop_database: drop_database(db_name)
-	if args.create_user: create_user(db_name, db_user)
+	if args.create_user: create_user(db_name, db_user, db_password)
 	if args.drop_user: drop_user(db_user)
 	
 	if args.database_freshen:
