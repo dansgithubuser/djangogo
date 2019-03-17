@@ -116,7 +116,7 @@ STATIC_URL = '/static/'\
 		): (
 '''\
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # from manage.py check --deploy
 SECURE_HSTS_SECONDS = 3600
