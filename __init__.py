@@ -9,17 +9,18 @@ import webbrowser
 
 def make_parser():
   parser = argparse.ArgumentParser()
-  parser.add_argument('--create-database', action='store_true')
-  parser.add_argument('--drop-database', action='store_true')
-  parser.add_argument('--create-user', action='store_true')
-  parser.add_argument('--drop-user', action='store_true', help='as implemented, database must be dropped first')
-  parser.add_argument('--manage', '-m')
-  parser.add_argument('--deploy', '-d', action='store_true')
-  parser.add_argument('--log', '-l', action='store_true')
-  parser.add_argument('--run', '-r', action='store_true')
-  parser.add_argument('--heroku-psql', '-s', action='store_true')
-  parser.add_argument('--browser', '-b', action='store_true')
-  parser.add_argument('--show-urls', '-u', action='store_true')
+  parser.add_argument('--create-database', action='store_true', help='create local database for this project')
+  parser.add_argument('--drop-database', action='store_true', help='drop local database for this project')
+  parser.add_argument('--create-user', action='store_true', help='create local database user for this project')
+  parser.add_argument('--drop-user', action='store_true', help='drop local database user for this project; database must be dropped first')
+  parser.add_argument('--manage', '-m', help='set up djangogo env and run manage.py with given args')
+  parser.add_argument('--deploy', '-d', action='store_true', help='deploy to heroku')
+  parser.add_argument('--log', '-l', action='store_true', help='tail heroku server logs')
+  parser.add_argument('--run', '-r', action='store_true', help='run server locally')
+  parser.add_argument('--heroku-psql', '-s', action='store_true', help='psql to heroku database')
+  parser.add_argument('--browser', '-b', action='store_true', help='open heroku website in browser')
+  parser.add_argument('--show-urls', '-u', action='store_true', help='show exposed URLs')
+  parser.add_argument('--install', '-i', action='store_true', help='update Pipfile.lock wrt Pipfile')
   return parser
 
 def invoke(*args, **kwargs):
@@ -78,3 +79,7 @@ def main(args, project, app, db_name, db_user, heroku_url, db_password='dev-pass
 
   if args.show_urls:
     invoke('python3', 'manage.py', 'show_urls')
+
+  if args.install:
+    invoke('pipenv', '--three')
+    invoke('pipenv', 'install')
