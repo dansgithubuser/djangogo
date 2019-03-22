@@ -13,8 +13,7 @@ def make_parser():
   parser.add_argument('--drop-database', action='store_true')
   parser.add_argument('--create-user', action='store_true')
   parser.add_argument('--drop-user', action='store_true', help='as implemented, database must be dropped first')
-  parser.add_argument('--database-freshen', action='store_true', help='drop database and user; create database and user')
-  parser.add_argument('--migrate', action='store_true')
+  parser.add_argument('--manage', '-m')
   parser.add_argument('--deploy', '-d', action='store_true')
   parser.add_argument('--log', '-l', action='store_true')
   parser.add_argument('--run', '-r', action='store_true')
@@ -57,15 +56,8 @@ def main(args, project, app, db_name, db_user, heroku_url, db_password='dev-pass
   if args.create_user: create_user(db_name, db_user, db_password)
   if args.drop_user: drop_user(db_user)
 
-  if args.database_freshen:
-    drop_database(db_name)
-    drop_user(db_user)
-    create_database(db_name)
-    create_user(db_name, db_user, db_password)
-
-  if args.migrate:
-    invoke('python3', 'manage.py', 'makemigrations', app)
-    invoke('python3', 'manage.py', 'migrate')
+  if args.manage:
+    invoke('python3', 'manage.py', args.manage)
 
   if args.deploy:
     invoke('python3', 'manage.py', 'check', '--deploy')
