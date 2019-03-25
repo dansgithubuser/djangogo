@@ -49,10 +49,10 @@ if not args.name:
   )
   sys.exit()
 
-project = snake_case(args.name) + '_proj'
-app = snake_case(args.name) + '_app'
-db_name = lower_snake_case(args.name) + '_database'
-db_user = lower_snake_case(args.name) + '_user'
+project = 'PROJ_' + snake_case(args.name)
+app = 'APP_' + snake_case(args.name)
+db_name = 'db_' + lower_snake_case(args.name)
+db_user = 'u_' + lower_snake_case(args.name)
 
 #create heroku app with given name, or fail now if it's taken
 heroku_create_stdout = invoke('heroku', 'create', lower_kebab_case(args.name), stdout=True, shell=True)
