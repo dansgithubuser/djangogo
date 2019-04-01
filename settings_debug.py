@@ -1,7 +1,7 @@
 from .settings import *
 
 DEBUG = True
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 del SECURE_HSTS_SECONDS
 del SECURE_CONTENT_TYPE_NOSNIFF
