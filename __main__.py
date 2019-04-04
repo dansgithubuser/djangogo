@@ -16,7 +16,7 @@ def find_replace_copy(src, find_replace, dst):
 def lower_kebab_case(s): return s.lower().replace('_', '-')
 def snake_case(s): return s.replace('-', '_')
 def lower_snake_case(s): return snake_case(s.lower())
-def camel_case(s): return s.title().replace(' ', '')
+def camel_case(s): return s.title().replace('_', '')
 
 parser = make_parser()
 parser.add_argument('--create', dest='name')
