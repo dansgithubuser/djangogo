@@ -49,8 +49,8 @@ if not args.name:
   )
   sys.exit()
 
-project = 'PROJ_' + snake_case(args.name)
-app = 'APP_' + snake_case(args.name)
+project = 'proj_' + snake_case(args.name)
+app = snake_case(args.name)
 db_name = 'db_' + lower_snake_case(args.name)
 db_user = 'u_' + lower_snake_case(args.name)
 
