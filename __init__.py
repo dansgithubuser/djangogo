@@ -18,6 +18,7 @@ def make_parser():
   parser.add_argument('--log', '-l', action='store_true', help='tail heroku server logs')
   parser.add_argument('--run', '-r', action='store_true', help='run server locally')
   parser.add_argument('--heroku-psql', '-s', action='store_true', help='psql to heroku database')
+  parser.add_argument('--heroku-remote-add', '--hra', action='store_true')
   parser.add_argument('--browser', '-b', action='store_true', help='open heroku website in browser')
   parser.add_argument('--show-urls', '-u', action='store_true', help='show exposed URLs')
   parser.add_argument('--install', '-i', action='store_true', help='update Pipfile.lock wrt Pipfile')
@@ -49,7 +50,7 @@ def create_user(database, user, password='dev-password'):
 
 def drop_user(user): psqlc('DROP USER {}'.format(user))
 
-def main(args, project, app, db_name, db_user, heroku_url, db_password='dev-password'):
+def main(args, project, app, db_name, db_user, heroku_url, heroku_repo=None, db_password='dev-password'):
   os.environ['DJANGOGO_ENV'] = 'local'
 
   if args.create_database: create_database(db_name)
@@ -73,6 +74,9 @@ def main(args, project, app, db_name, db_user, heroku_url, db_password='dev-pass
 
   if args.heroku_psql:
     invoke('heroku', 'pg:psql', shell=True)
+
+  if args.heroku_remote_add:
+    invoke('git', 'remote', 'add', 'heroku', heroku_repo)
 
   if args.browser:
     webbrowser.open_new_tab(heroku_url)

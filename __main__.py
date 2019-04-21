@@ -178,11 +178,12 @@ def literalify(string): return "'{}'".format(string)
 find_replace_copy(
   os.path.join(DIR, 'go.py'),
   {
-    '{project}'   : literalify(project),
-    '{app}'       : literalify(app),
-    '{db_name}'   : literalify(db_name),
-    '{db_user}'   : literalify(db_user),
-    '{heroku_url}': literalify(heroku_url),
+    '{project}'    : literalify(project),
+    '{app}'        : literalify(app),
+    '{db_name}'    : literalify(db_name),
+    '{db_user}'    : literalify(db_user),
+    '{heroku_url}' : literalify(heroku_url),
+    '{heroku_repo}': literalify(heroku_repo),
   },
   'go.py',
 )

@@ -14,4 +14,5 @@ djangogo.main(args,
     db_name={db_name},
     db_user={db_user},
     heroku_url={heroku_url},
+    heroku_repo={heroku_repo},
 )
