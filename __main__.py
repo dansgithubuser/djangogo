@@ -5,7 +5,7 @@ import re
 import shutil
 import subprocess
 
-DIR = os.path.dirname(os.path.realpath(__file__))
+_DIR = os.path.dirname(os.path.realpath(__file__))
 
 def find_replace_copy(src, find_replace, dst):
   with open(src) as file: contents = file.read()
@@ -59,7 +59,7 @@ heroku_create_stdout = invoke('heroku', 'create', lower_kebab_case(args.name), s
 
 #=====bookkeeping=====#
 start = os.getcwd()
-os.chdir(DIR)
+os.chdir(_DIR)
 commit = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode().strip()
 diff = len(subprocess.check_output(['git', 'diff', 'HEAD'])) != 0
 os.chdir(start)
@@ -70,14 +70,14 @@ os.chdir(args.name)
 #=====heroku=====#
 #Procfile
 find_replace_copy(
-  os.path.join(DIR, 'Procfile'),
+  os.path.join(_DIR, 'Procfile'),
   {'{project}': project},
   'Procfile',
 )
 #app.json
-shutil.copy(os.path.join(DIR, 'app.json'), '.')
+shutil.copy(os.path.join(_DIR, 'app.json'), '.')
 #Pipfile
-shutil.copy(os.path.join(DIR, 'Pipfile'), '.')
+shutil.copy(os.path.join(_DIR, 'Pipfile'), '.')
 invoke('pipenv', '--three')
 invoke('pipenv', 'install')
 #create
@@ -172,11 +172,11 @@ MIDDLEWARE = [\
   os.path.join(project, 'settings.py'),
 )
 #settings_debug.py
-shutil.copy(os.path.join(DIR, 'settings_debug.py'), project)
+shutil.copy(os.path.join(_DIR, 'settings_debug.py'), project)
 #=====go.py=====#
 def literalify(string): return "'{}'".format(string)
 find_replace_copy(
-  os.path.join(DIR, 'go.py'),
+  os.path.join(_DIR, 'go.py'),
   {
     '{project}'    : literalify(project),
     '{app}'        : literalify(app),
@@ -188,7 +188,7 @@ find_replace_copy(
   'go.py',
 )
 #=====git=====#
-shutil.copy(os.path.join(DIR, '.gitignore'), '.')
+shutil.copy(os.path.join(_DIR, '.gitignore'), '.')
 invoke('git', 'init', '.')
 os.mkdir('deps')
 invoke('git', 'submodule', 'add', 'https://github.com/dansgithubuser/djangogo', 'deps/djangogo')
