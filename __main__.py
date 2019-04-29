@@ -1,11 +1,30 @@
 from __init__ import *
 import argparse
+import atexit
+import json
 import os
 import re
 import shutil
 import subprocess
 
 _DIR = os.path.dirname(os.path.realpath(__file__))
+_TMP = os.path.join(_DIR, '.tmp')
+
+def save_progress():
+  with open(_TMP, 'w') as f:
+    f.write(json.dumps({
+      k: v for k, v in globals().items()
+      if type(v) in [str, bytes] and not k.startswith('_')
+    }))
+
+def check_progress():
+  if not os.path.exists(_TMP): return False
+  with open(_TMP) as f:
+    return json.loads(f.read())['progress'] != 'complete'
+
+def load_progress():
+  with open(_TMP) as f:
+    globals().update(json.loads(f.read()))
 
 def find_replace_copy(src, find_replace, dst):
   with open(src) as file: contents = file.read()
@@ -49,13 +68,19 @@ if not args.name:
   )
   sys.exit()
 
+if check_progress(): load_progress()
+else: progress = 'fresh'
+atexit.register(save_progress)
+
 project = 'proj_' + snake_case(args.name)
 app = snake_case(args.name)
 db_name = 'db_' + lower_snake_case(args.name)
 db_user = 'u_' + lower_snake_case(args.name)
 
-#create heroku app with given name, or fail now if it's taken
-heroku_create_stdout = invoke('heroku', 'create', lower_kebab_case(args.name), stdout=True, shell=True)
+if progress == 'fresh':
+  #create heroku app with given name, or fail now if it's taken
+  heroku_create_stdout = invoke('heroku', 'create', lower_kebab_case(args.name), stdout=True, shell=True)
+  progress = 'heroku create'
 
 #=====bookkeeping=====#
 start = os.getcwd()
@@ -64,8 +89,10 @@ commit = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode().strip()
 diff = len(subprocess.check_output(['git', 'diff', 'HEAD'])) != 0
 os.chdir(start)
 #=====django start project=====#
-os.mkdir(args.name)
-invoke('django-admin', 'startproject', project, args.name)
+if progress == 'heroku create':
+  os.mkdir(args.name)
+  invoke('django-admin', 'startproject', project, args.name)
+  progress = 'django project start'
 os.chdir(args.name)
 #=====heroku=====#
 #Procfile
@@ -78,14 +105,20 @@ find_replace_copy(
 shutil.copy(os.path.join(_DIR, 'app.json'), '.')
 #Pipfile
 shutil.copy(os.path.join(_DIR, 'Pipfile'), '.')
-invoke('pipenv', '--three')
-invoke('pipenv', 'install')
+if progress == 'django project start':
+  invoke('pipenv', '--three')
+  progress = 'pipenv three'
+if progress == 'pipenv three':
+  invoke('pipenv', 'install')
+  progress = 'pipenv install'
 #create
 heroku_url, heroku_repo = re.search(r'(.+) \| (.+)\n', heroku_create_stdout).groups()
 heroku_app = re.search('https://([^.]+)', heroku_url).group(1)
 #=====django=====#
 #app
-invoke('python3', 'manage.py', 'startapp', app)
+if progress == 'pipenv three':
+  invoke('python3', 'manage.py', 'startapp', app)
+  progress = 'manage start app'
 #settings.py
 find_replace_copy(
   os.path.join(project, 'settings.py'),
@@ -195,3 +228,5 @@ invoke('git', 'submodule', 'add', 'https://github.com/dansgithubuser/djangogo', 
 invoke('git', 'add', '.')
 invoke('git', 'commit', '-m', 'initial commit created by djangogo ' + commit + (' with diff' if diff else ''))
 invoke('git', 'remote', 'add', 'heroku', 'https://git.heroku.com/{}.git'.format(heroku_app))
+
+progress = 'complete'
