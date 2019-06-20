@@ -116,7 +116,7 @@ heroku_url, heroku_repo = re.search(r'(.+) \| (.+)\n', heroku_create_stdout).gro
 heroku_app = re.search('https://([^.]+)', heroku_url).group(1)
 #=====django=====#
 #app
-if progress == 'pipenv three':
+if progress == 'pipenv install':
   invoke('python3', 'manage.py', 'startapp', app)
   progress = 'manage start app'
 #settings.py
