@@ -229,4 +229,9 @@ invoke('git', 'add', '.')
 invoke('git', 'commit', '-m', 'initial commit created by djangogo ' + commit + (' with diff' if diff else ''))
 invoke('git', 'remote', 'add', 'heroku', 'https://git.heroku.com/{}.git'.format(heroku_app))
 
+#=====database setup=====#
+invoke('python3', 'go.py', '--create-database')
+invoke('python3', 'go.py', '--create-user')
+invoke('python3', 'go.py', '--manage', 'migrate')
+
 progress = 'complete'
