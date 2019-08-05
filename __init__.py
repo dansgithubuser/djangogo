@@ -13,6 +13,7 @@ def make_parser():
   parser.add_argument('--drop-database', action='store_true', help='drop local database for this project')
   parser.add_argument('--create-user', action='store_true', help='create local database user for this project')
   parser.add_argument('--drop-user', action='store_true', help='drop local database user for this project; database must be dropped first')
+  parser.add_argument('--freshen-database', action='store_true', help='drop database, drop user, create database, create user, run migrations')
   parser.add_argument('--manage', '-m', nargs='*', help='set up djangogo env and run manage.py with given args')
   parser.add_argument('--deploy', '-d', action='store_true', help='deploy to heroku')
   parser.add_argument('--log', '-l', action='store_true', help='tail heroku server logs')
@@ -58,6 +59,15 @@ def main(args, project, app, db_name, db_user, heroku_url, heroku_repo=None, db_
   if args.drop_database: drop_database(db_name)
   if args.create_user: create_user(db_name, db_user, db_password)
   if args.drop_user: drop_user(db_user)
+  if args.freshen_database:
+    def attempt(f):
+      try: f()
+      except: pass
+    attempt(lambda: drop_database(db_name))
+    attempt(lambda: drop_database('test_'+db_name))
+    drop_user(db_user)
+    create_database(db_name)
+    create_user(db_name, db_user, db_password)
 
   if args.manage:
     invoke('python3', 'manage.py', *[i.strip() for i in args.manage])
