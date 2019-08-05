@@ -47,6 +47,7 @@ def create_user(database, user, password='dev-password'):
   psqla('default_transaction_isolation', 'read committed', user)
   psqla('timezone', 'UTC', user)
   psqlc('GRANT ALL PRIVILEGES ON DATABASE {} TO {};'.format(database, user))
+  psqlc('ALTER USER {} CREATEDB;'.format(user))
 
 def drop_user(user): psqlc('DROP USER {}'.format(user))
 
