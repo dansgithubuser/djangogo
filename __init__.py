@@ -68,6 +68,7 @@ def main(args, project, app, db_name, db_user, heroku_url, heroku_repo=None, db_
     drop_user(db_user)
     create_database(db_name)
     create_user(db_name, db_user, db_password)
+    invoke('python3', 'manage.py', 'migrate')
 
   if args.manage:
     invoke('python3', 'manage.py', *[i.strip() for i in args.manage])
