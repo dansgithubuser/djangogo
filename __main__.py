@@ -171,6 +171,8 @@ X_FRAME_OPTIONS = 'DENY'
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 
+LOGIN_REDIRECT_URL = '/'
+
 if os.environ.get('DJANGOGO_ENV') != 'local':
     import django_heroku
     django_heroku.settings(locals())\
@@ -216,8 +218,10 @@ MIDDLEWARE = [\
 #settings_debug.py
 shutil.copy(os.path.join(_DIR, 'settings_debug.py'), project)
 #{app}/urls.py
-urlpatterns = '['
-urlpatterns += ']'
+urlpatterns = '''[
+    path('', TemplateView.as_view(template_name='home.html')),
+    path('login', auth_views.LoginView.as_view(template_name='login.html')),
+]'''
 find_replace_copy(
   os.path.join(_DIR, 'app_urls.py'),
   {
@@ -242,6 +246,20 @@ find_replace_copy(
   },
   'shell_startup.py',
 )
+#{app}/views.py
+shutil.copy(os.path.join(_DIR, 'views.py'), app)
+#templates
+os.mkdir(os.path.join(app, 'templates'))
+find_replace_copy(
+  os.path.join(_DIR, 'base.html'),
+  {
+    '{name}': args.name,
+  },
+  os.path.join(app, 'templates', 'base.html'),
+)
+shutil.copy(os.path.join(_DIR, 'home.html'), os.path.join(app, 'templates'))
+shutil.copy(os.path.join(_DIR, 'signup.html'), os.path.join(app, 'templates'))
+shutil.copy(os.path.join(_DIR, 'login.html'), os.path.join(app, 'templates'))
 #=====go.py=====#
 def literalify(string): return "'{}'".format(string)
 find_replace_copy(

@@ -12,5 +12,4 @@ Djangogo performs the following setup:
 - commit tracking details if they are ever needed
 
 TODO
-- option to generate signup and login views; base, home, signup, and login templates; and LOGIN_REDIRECT_URL
 - crudify
