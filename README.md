@@ -14,5 +14,3 @@ Djangogo performs the following setup:
 TODO
 - option to generate signup and login views; base, home, signup, and login templates; and LOGIN_REDIRECT_URL
 - crudify
-- shell helper that imports models
-- heroku run bash

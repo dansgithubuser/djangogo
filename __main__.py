@@ -234,6 +234,14 @@ find_replace_copy(
   },
   os.path.join(project, 'urls.py'),
 )
+#shell_startup.py
+find_replace_copy(
+  os.path.join(_DIR, 'shell_startup.py'),
+  {
+    '{app}': app,
+  },
+  'shell_startup.py',
+)
 #=====go.py=====#
 def literalify(string): return "'{}'".format(string)
 find_replace_copy(

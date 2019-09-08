@@ -9,20 +9,25 @@ import webbrowser
 
 def make_parser():
   parser = argparse.ArgumentParser()
+  #setup
   parser.add_argument('--create-database', action='store_true', help='create local database for this project')
   parser.add_argument('--drop-database', action='store_true', help='drop local database for this project')
   parser.add_argument('--create-user', action='store_true', help='create local database user for this project')
   parser.add_argument('--drop-user', action='store_true', help='drop local database user for this project; database must be dropped first')
   parser.add_argument('--freshen-database', action='store_true', help='drop database, drop user, create database, create user, run migrations')
+  #development
   parser.add_argument('--manage', '-m', nargs='*', help='set up djangogo env and run manage.py with given args')
-  parser.add_argument('--deploy', '-d', action='store_true', help='deploy to heroku')
-  parser.add_argument('--log', '-l', action='store_true', help='tail heroku server logs')
   parser.add_argument('--run', '-r', action='store_true', help='run server locally')
+  parser.add_argument('--show-urls', '-u', action='store_true', help='show exposed URLs')
+  parser.add_argument('--install', '--ins', action='store_true', help='update Pipfile.lock wrt Pipfile')
+  parser.add_argument('--interact', '-i', action='store_true', help='enter interactive Python with models imported')
+  #heroku
+  parser.add_argument('--deploy', '-d', action='store_true', help='deploy to heroku')
+  parser.add_argument('--heroku-log', '-l', action='store_true', help='tail heroku server log')
+  parser.add_argument('--heroku-bash', '-b', action='store_true', help='psql to heroku database')
   parser.add_argument('--heroku-psql', '-s', action='store_true', help='psql to heroku database')
   parser.add_argument('--heroku-remote-add', '--hra', action='store_true')
-  parser.add_argument('--browser', '-b', action='store_true', help='open heroku website in browser')
-  parser.add_argument('--show-urls', '-u', action='store_true', help='show exposed URLs')
-  parser.add_argument('--install', '-i', action='store_true', help='update Pipfile.lock wrt Pipfile')
+  parser.add_argument('--heroku-browser', '--hb', action='store_true', help='open heroku website in browser')
   return parser
 
 def invoke(*args, **kwargs):
@@ -73,25 +78,8 @@ def main(args, project, app, db_name, db_user, heroku_url, heroku_repo=None, db_
   if args.manage:
     invoke('python3', 'manage.py', *[i.strip() for i in args.manage])
 
-  if args.deploy:
-    invoke('python3', 'manage.py', 'check', '--deploy')
-    invoke('git', 'push', '-f', 'heroku', 'master')
-    invoke('heroku', 'run', 'python', 'manage.py', 'migrate', shell=True)
-
-  if args.log:
-    invoke('heroku', 'logs', '--tail', shell=True)
-
   if args.run:
     invoke('python3', 'manage.py', 'runserver', '--settings', project+'.settings_debug', '0.0.0.0:8000')
-
-  if args.heroku_psql:
-    invoke('heroku', 'pg:psql', shell=True)
-
-  if args.heroku_remote_add:
-    invoke('git', 'remote', 'add', 'heroku', heroku_repo)
-
-  if args.browser:
-    webbrowser.open_new_tab(heroku_url)
 
   if args.show_urls:
     invoke('python3', 'manage.py', 'show_urls')
@@ -99,3 +87,27 @@ def main(args, project, app, db_name, db_user, heroku_url, heroku_repo=None, db_
   if args.install:
     invoke('pipenv', '--three')
     invoke('pipenv', 'install')
+
+  if args.interact:
+    os.environ['PYTHONSTARTUP'] = 'shell_startup.py'
+    invoke('python3', 'manage.py', 'shell')
+
+  if args.deploy:
+    invoke('python3', 'manage.py', 'check', '--deploy')
+    invoke('git', 'push', '-f', 'heroku', 'master')
+    invoke('heroku', 'run', 'python', 'manage.py', 'migrate', shell=True)
+
+  if args.heroku_log:
+    invoke('heroku', 'logs', '--tail', shell=True)
+
+  if args.heroku_bash:
+    invoke('heroku', 'run', 'bash')
+
+  if args.heroku_psql:
+    invoke('heroku', 'pg:psql', shell=True)
+
+  if args.heroku_remote_add:
+    invoke('git', 'remote', 'add', 'heroku', heroku_repo)
+
+  if args.heroku_browser:
+    webbrowser.open_new_tab(heroku_url)
