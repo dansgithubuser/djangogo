@@ -39,6 +39,7 @@ def camel_case(s): return s.title().replace('_', '')
 
 parser = make_parser()
 parser.add_argument('--create', dest='name')
+parser.add_argument('--dev', action='store_true')
 args = parser.parse_args()
 
 if not args.name:
@@ -70,16 +71,22 @@ if not args.name:
 
 if check_progress(): load_progress()
 else: progress = 'fresh'
-atexit.register(save_progress)
+if not args.dev: atexit.register(save_progress)
 
 project = 'proj_' + snake_case(args.name)
 app = snake_case(args.name)
 db_name = 'db_' + lower_snake_case(args.name)
 db_user = 'u_' + lower_snake_case(args.name)
 
+if args.dev:
+  shutil.rmtree(args.name, ignore_errors=True)
+
 if progress == 'fresh':
   #create heroku app with given name, or fail now if it's taken
-  heroku_create_stdout = invoke('heroku', 'create', lower_kebab_case(args.name), stdout=True, shell=True)
+  if not args.dev:
+    heroku_create_stdout = invoke('heroku', 'create', lower_kebab_case(args.name), stdout=True, shell=True)
+  else:
+    heroku_create_stdout = 'https://HEROKU_APP_PLACEHOLDER.herokuapp.com/ | HEROKU_REPO_PLACEHOLDER\n'
   progress = 'heroku create'
 
 #=====bookkeeping=====#
@@ -106,10 +113,12 @@ shutil.copy(os.path.join(_DIR, 'app.json'), '.')
 #Pipfile
 shutil.copy(os.path.join(_DIR, 'Pipfile'), '.')
 if progress == 'django project start':
-  invoke('pipenv', '--three')
+  if not args.dev:
+    invoke('pipenv', '--three')
   progress = 'pipenv three'
 if progress == 'pipenv three':
-  invoke('pipenv', 'install')
+  if not args.dev:
+    invoke('pipenv', 'install')
   progress = 'pipenv install'
 #create
 heroku_url, heroku_repo = re.search(r'(.+) \| (.+)\n', heroku_create_stdout).groups()
@@ -230,6 +239,9 @@ invoke('git', 'commit', '-m', 'initial commit created by djangogo ' + commit + (
 invoke('git', 'remote', 'add', 'heroku', 'https://git.heroku.com/{}.git'.format(heroku_app))
 
 #=====database setup=====#
+if args.dev:
+  invoke('python3', 'go.py', '--drop-database')
+  invoke('python3', 'go.py', '--drop-user')
 invoke('python3', 'go.py', '--create-database')
 invoke('python3', 'go.py', '--create-user')
 invoke('python3', 'go.py', '--manage', 'migrate')
