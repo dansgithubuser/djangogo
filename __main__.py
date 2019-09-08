@@ -215,6 +215,25 @@ MIDDLEWARE = [\
 )
 #settings_debug.py
 shutil.copy(os.path.join(_DIR, 'settings_debug.py'), project)
+#{app}/urls.py
+urlpatterns = '['
+urlpatterns += ']'
+find_replace_copy(
+  os.path.join(_DIR, 'app_urls.py'),
+  {
+    '{urlpatterns}': urlpatterns,
+    '{app}': app,
+  },
+  os.path.join(app, 'urls.py'),
+)
+#{project}/urls.py
+find_replace_copy(
+  os.path.join(_DIR, 'urls.py'),
+  {
+    '{app}': app,
+  },
+  os.path.join(project, 'urls.py'),
+)
 #=====go.py=====#
 def literalify(string): return "'{}'".format(string)
 find_replace_copy(

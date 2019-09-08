@@ -12,8 +12,6 @@ Djangogo performs the following setup:
 - commit tracking details if they are ever needed
 
 TODO
-- app url file that inspects views
-- include app urls in proj
 - option to generate signup and login views; base, home, signup, and login templates; and LOGIN_REDIRECT_URL
 - crudify
 - shell helper that imports models
