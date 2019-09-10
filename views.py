@@ -1,5 +1,7 @@
 from . import models
 
+from rest_framework import serializers, viewsets
+
 from django.contrib import auth
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
@@ -7,6 +9,7 @@ from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 
+import inspect
 import json
 
 @csrf_exempt
@@ -38,3 +41,16 @@ def login_json(request):
         return HttpResponse(status=200)
     else:
         return HttpResponse(status=400)
+
+for name, model in inspect.getmembers(models):
+    if getattr(model, '__module__', None) != '{app}.models': continue
+    if not issubclass(model, models.models.Model): continue
+    exec(f'''class {name}Serializer(serializers.ModelSerializer):
+        class Meta:
+            model = models.{name}
+            fields = '__all__'
+    ''')
+    exec(f'''class {name}Viewset(viewsets.ModelViewSet):
+        queryset = models.{name}.objects.all()
+        serializer_class = {name}Serializer
+    ''')

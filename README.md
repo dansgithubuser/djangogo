@@ -10,6 +10,3 @@ Djangogo performs the following setup:
 - new app
 - dev helper script called go.py
 - commit tracking details if they are ever needed
-
-TODO
-- crudify

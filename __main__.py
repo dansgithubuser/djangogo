@@ -196,6 +196,7 @@ INSTALLED_APPS = [\
     ): (
 '''\
 INSTALLED_APPS = [
+    'rest_framework',
     '{}.apps.{}',\
 '''
     ).format(app, camel_case(app) + 'Config'),
@@ -218,14 +219,9 @@ MIDDLEWARE = [\
 #settings_debug.py
 shutil.copy(os.path.join(_DIR, 'settings_debug.py'), project)
 #{app}/urls.py
-urlpatterns = '''[
-    path('', TemplateView.as_view(template_name='home.html')),
-    path('login', auth_views.LoginView.as_view(template_name='login.html')),
-]'''
 find_replace_copy(
   os.path.join(_DIR, 'app_urls.py'),
   {
-    '{urlpatterns}': urlpatterns,
     '{app}': app,
   },
   os.path.join(app, 'urls.py'),
@@ -246,8 +242,16 @@ find_replace_copy(
   },
   'shell_startup.py',
 )
+#{app}/models.py
+shutil.copy(os.path.join(_DIR, 'models.py'), app)
 #{app}/views.py
-shutil.copy(os.path.join(_DIR, 'views.py'), app)
+find_replace_copy(
+  os.path.join(_DIR, 'views.py'),
+  {
+    '{app}': app,
+  },
+  os.path.join(app, 'views.py'),
+)
 #templates
 os.mkdir(os.path.join(app, 'templates'))
 find_replace_copy(
