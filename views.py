@@ -30,6 +30,7 @@ def signup(request):
         form = UserCreationForm()
     return render(request, 'signup.html', {'form': form}, status=status)
 
+@csrf_exempt
 def login_json(request):
     params = json.loads(request.body.decode())
     user = auth.authenticate(
