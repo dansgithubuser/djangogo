@@ -3,8 +3,10 @@ import argparse
 import atexit
 import json
 import os
+import random
 import re
 import shutil
+import string
 import subprocess
 
 _DIR = os.path.dirname(os.path.realpath(__file__))
@@ -77,6 +79,7 @@ project = 'proj_' + snake_case(args.name)
 app = snake_case(args.name)
 db_name = 'db_' + lower_snake_case(args.name)
 db_user = 'u_' + lower_snake_case(args.name)
+env_prefix = lower_snake_case(args.name).upper()
 
 if args.dev:
   shutil.rmtree(args.name, ignore_errors=True)
@@ -132,18 +135,21 @@ if progress == 'pipenv install':
 find_replace_copy(
   os.path.join(project, 'settings.py'),
   {
-    #add heroku to allowed hosts
+    #secret key in production, add heroku to allowed hosts
     (
 '''\
 ALLOWED_HOSTS = []\
 '''
     ): (
 '''\
+if os.environ.get('DJANGOGO_ENV') != 'local':
+    SECRET_KEY = os.environ['{}_SECRET_KEY']
+
 ALLOWED_HOSTS = [
     '{}',
 ]\
 '''
-    ).format(heroku_url),
+    ).format(env_prefix, heroku_url),
     #install app
     (
 '''\
@@ -291,6 +297,12 @@ invoke('git', 'submodule', 'add', 'https://github.com/dansgithubuser/djangogo', 
 invoke('git', 'add', '.')
 invoke('git', 'commit', '-m', 'initial commit created by djangogo ' + commit + (' with diff' if diff else ''))
 invoke('git', 'remote', 'add', 'heroku', 'https://git.heroku.com/{}.git'.format(heroku_app))
+
+#=====heroku env=====#
+invoke('heroku', 'config:set', '{}_SECRET_KEY={}'.format(
+  env_prefix,
+  ''.join(random.choice(string.ascii_letters + string.digits) for i in range(32)),
+), shell=True)
 
 #=====database setup=====#
 if args.dev:
