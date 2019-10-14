@@ -132,6 +132,45 @@ if progress == 'pipenv install':
 find_replace_copy(
   os.path.join(project, 'settings.py'),
   {
+    #add heroku to allowed hosts
+    (
+'''\
+ALLOWED_HOSTS = []\
+'''
+    ): (
+'''\
+ALLOWED_HOSTS = [
+    '{}',
+]\
+'''
+    ).format(heroku_url),
+    #install app
+    (
+'''\
+INSTALLED_APPS = [\
+'''
+    ): (
+'''\
+INSTALLED_APPS = [
+    'rest_framework',
+    '{}.apps.{}',\
+'''
+    ).format(app, camel_case(app) + 'Config'),
+    #django extensions for local development
+    (
+'''\
+MIDDLEWARE = [\
+'''
+    ): (
+'''\
+if os.environ.get('DJANGOGO_ENV', None) == 'local':
+    INSTALLED_APPS.append('django_extensions')
+
+MIDDLEWARE = [\
+'''
+    ),
+    'DEBUG = True': 'DEBUG = False',
+    #postgres
     (
 '''\
     'default': {
@@ -151,6 +190,7 @@ find_replace_copy(
     }}\
 '''
     ).format(db_name, db_user, db_name.upper()),
+    #static files, security, login, and heroku settings
     (
 '''\
 STATIC_URL = '/static/'\
@@ -178,41 +218,6 @@ if os.environ.get('DJANGOGO_ENV') != 'local':
     django_heroku.settings(locals())\
 '''
     ),
-    (
-'''\
-ALLOWED_HOSTS = []\
-'''
-    ): (
-'''\
-ALLOWED_HOSTS = [
-    '{}',
-]\
-'''
-    ).format(heroku_url),
-    (
-'''\
-INSTALLED_APPS = [\
-'''
-    ): (
-'''\
-INSTALLED_APPS = [
-    'rest_framework',
-    '{}.apps.{}',\
-'''
-    ).format(app, camel_case(app) + 'Config'),
-    (
-'''\
-MIDDLEWARE = [\
-'''
-    ): (
-'''\
-if os.environ.get('DJANGOGO_ENV', None) == 'local':
-    INSTALLED_APPS.append('django_extensions')
-
-MIDDLEWARE = [\
-'''
-    ),
-    'DEBUG = True': 'DEBUG = False',
   },
   os.path.join(project, 'settings.py'),
 )
