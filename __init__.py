@@ -94,7 +94,7 @@ def main(args, project, app, db_name, db_user, heroku_url, heroku_repo=None, db_
 
   if args.deploy:
     invoke('python3', 'manage.py', 'check', '--deploy')
-    invoke('git', 'push', '-f', 'heroku', 'master')
+    invoke('git', 'push', '-f', 'heroku', 'HEAD:master')
     invoke('heroku', 'run', 'python', 'manage.py', 'migrate', shell=True)
 
   if args.heroku_log:
