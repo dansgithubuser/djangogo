@@ -45,6 +45,7 @@ def login_json(request):
 
 for name, model in inspect.getmembers(models):
     if getattr(model, '__module__', None) != '{app}.models': continue
+    if not inspect.isclass(model): continue
     if not issubclass(model, models.models.Model): continue
     exec(f'''class {name}Serializer(serializers.ModelSerializer):
         class Meta:
