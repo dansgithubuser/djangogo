@@ -8,6 +8,7 @@ import re
 import shutil
 import string
 import subprocess
+import sys
 
 _DIR = os.path.dirname(os.path.realpath(__file__))
 _TMP = os.path.join(_DIR, '.tmp')
@@ -40,6 +41,14 @@ def lower_snake_case(s): return snake_case(s.lower())
 def camel_case(s): return s.title().replace('_', '')
 
 parser = make_parser()
+parser.formatter_class = argparse.RawTextHelpFormatter
+parser.description = '''\
+There are two ways to use this script:
+  1) create a new project (use the --create option)
+  2) drop-in (run in a Django project directory)
+
+Note: drop-in functionalty should not be confused with the similar functionality offered by the go.py script that Djangogo puts into projects it creates.
+'''
 parser.add_argument('--create', dest='name')
 parser.add_argument('--dev', action='store_true')
 args = parser.parse_args()
@@ -51,6 +60,9 @@ if not args.name:
         if os.path.exists(os.path.join(i, file_name)):
           return i
   project = find_folder_with('settings.py')
+  if not project:
+    parser.print_help()
+    sys.exit()
   app = find_folder_with('apps.py')
   sys.path.append(project)
   import settings
