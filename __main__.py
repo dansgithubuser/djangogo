@@ -12,6 +12,7 @@ parser = argparse.ArgumentParser(description='Start a project in `./{name}`')
 parser.add_argument('name')
 parser.add_argument('--proj-name', default='proj')
 parser.add_argument('--app-name', default='app')
+parser.add_argument('--port', type=int, default=8000)
 args = parser.parse_args()
 
 #===== consts =====#
@@ -96,6 +97,7 @@ subs = {
     'app_name': args.app_name,
     'db_name': args.name.lower(),
     'db_user': 'u_' + args.name.lower(),
+    'port': args.port,
 }
 
 # django project & git init
@@ -114,7 +116,6 @@ invoke('git', 'commit', '-m', f'./manage.py startapp {args.app_name}')
 
 # settings
 render_template('settings.py', f'{args.proj_name}/settings.py', subs)
-render_template('settings_dev.py', f'{args.proj_name}/settings_dev.py')
 
 # URLs
 render_template('app_urls.py', f'{args.app_name}/urls.py', subs)
@@ -137,8 +138,9 @@ os.chmod('do.py', 0o775)
 # requirements.txt
 render_template('requirements.txt')
 
-# dev env
-render_template('env.dev')
+# docker
+render_template('Dockerfile', subs=subs)
+render_template('docker-compose.yml', subs=subs)
 
 # final git commit
 invoke('git add .')

@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:alpine
+    container_name: {name}-db
+    env_file: env-db
+    restart: always
+    logging:
+      options:
+        max-file: 3
+        max-size: 10m
+  main:
+    image: {name}:latest
+    container_name: {name}-main
+    env_file: env
+    logging:
+      options:
+        max-file: 3
+        max-size: 10m
+    ports:
+      - {port}:{port}
+    restart: always

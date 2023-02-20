@@ -14,6 +14,8 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 from pathlib import Path
 
+dev = os.environ.get('DJANGOGO_ENV') == 'development'
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -22,12 +24,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ['SECRET_KEY']
+if dev:
+    SECRET_KEY = 'django-insecure-key'
+else:
+    SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = dev
 
-if os.environ.get('DJANGOGO_ENV') == 'development':
+if dev:
     ALLOWED_HOSTS = ['*']
 else:
     ALLOWED_HOSTS = os.environ['ALLOWED_HOSTS'].split()
@@ -42,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_extensions',
     '{app_name}',
 ]
 
@@ -84,8 +90,8 @@ DATABASES = {{
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': '{db_name}',
         'USER': '{db_user}',
-        'PASSWORD': os.environ['DB_PASSWORD'],
-        'HOST': os.environ['DB_HOST'],
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'dev'),
+        'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
         'PORT': os.environ.get('DB_PORT', '5432'),
     }}
 }}
@@ -126,9 +132,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = os.environ['STATIC_ROOT']
-if not os.path.isabs(STATIC_ROOT):
-    STATIC_ROOT = BASE_DIR / STATIC_ROOT
+STATIC_ROOT = BASE_DIR / 'static'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -136,15 +140,12 @@ if not os.path.isabs(STATIC_ROOT):
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # from manage.py check --deploy
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-SECURE_HSTS_SECONDS = 3600
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
-
-# development settings
-if os.environ.get('DJANGOGO_ENV') == 'development':
-    with open(BASE_DIR / 'proj' / 'settings_dev.py') as f:
-        settings_dev = f.read()
-    exec(settings_dev, globals(), locals())
+if not dev:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 3600
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+else:
+    INTERNAL_IPS = ['127.0.0.1']
