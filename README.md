@@ -1,6 +1,7 @@
 Djangogo is a Django project starter with a few extra opinions. They are:
 - git
 - gunicorn
+- dotenv
 - postgres
 - whitenoise
 - security (we assume SSL will be handled by a proxy server)
