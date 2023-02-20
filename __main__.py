@@ -65,6 +65,9 @@ def invoke(
         return result
 
 #===== main =====#
+django_version = invoke('django-admin version', out=True)
 invoke(f'django-admin startproject {args.name}')
 os.chdir(args.name)
 invoke('git init .')
+invoke('git add .')
+invoke('git', 'commit', '-m', f'django-admin startproject {args.name} - django {django_version}')
