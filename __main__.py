@@ -10,6 +10,8 @@ import sys
 #===== args =====#
 parser = argparse.ArgumentParser(description='Start a project in `./{name}`')
 parser.add_argument('name')
+parser.add_argument('--project-name', default='proj')
+parser.add_argument('--app-name', default='app')
 args = parser.parse_args()
 
 #===== consts =====#
@@ -64,10 +66,28 @@ def invoke(
             if out != 'exact': result = result.strip()
         return result
 
+def render_template(src, dst, subs={}):
+    with open(f'{DIR}/templates/{src}') as f:
+        contents = f.read()
+    contents = contents.format(**subs)
+    with open(dst, 'w') as f:
+        f.write(contents)
+
 #===== main =====#
 django_version = invoke('django-admin version', out=True)
-invoke(f'django-admin startproject {args.name}')
+
+# django project & git init
+os.mkdir(args.name)
+invoke(f'django-admin startproject {args.project_name} {args.name}')
 os.chdir(args.name)
 invoke('git init .')
 invoke('git add .')
-invoke('git', 'commit', '-m', f'django-admin startproject {args.name} - django {django_version}')
+invoke('git', 'commit', '-m', f'django-admin startproject {args.project_name} {args.name} - django {django_version}')
+
+# django app
+invoke(f'./manage.py startapp {args.app_name}')
+invoke('git add .')
+invoke('git', 'commit', '-m', f'./manage.py startapp {args.app_name}')
+
+# .gitignore
+render_template('gitignore', '.gitignore')
