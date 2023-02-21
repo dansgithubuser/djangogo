@@ -179,6 +179,7 @@ if args.docker_create_env_files:
             f.write(line + '\n')
 
 if args.docker_run:
+    del os.environ['DJANGOGO_ENV']  # wtf docker?
     invoke('docker compose up -d')
 
 if args.docker_setup_db:
