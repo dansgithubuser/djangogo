@@ -1,4 +1,0 @@
-{
-  "image": "heroku/python",
-  "addons": ["heroku-postgresql"]
-}

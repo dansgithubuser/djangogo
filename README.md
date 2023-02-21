@@ -1,12 +1,12 @@
-After cloning into a folder at, say, /path/to/djangogo, navigate to where you want to create a new Django repo and run:
-`python3 /path/to/djangogo --create repo_name`
+Djangogo is a Django project starter with a few extra opinions. They are:
+- git
+- gunicorn
+- postgres
+- whitenoise
+- security (we assume SSL will be handled by a proxy server)
+- helper script for above & more
+- create a single app
 
-Djangogo performs the following setup:
-- heroku
-	- gunicorn
-	- postgres
-	- static resources
-	- various security settings
-- new app
-- dev helper script called go.py
-- commit tracking details if they are ever needed
+Djangogo has been tested with:
+- Django 4.1.7
+- Python 3.10.7
