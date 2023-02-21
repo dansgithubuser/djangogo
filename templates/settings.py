@@ -139,12 +139,14 @@ STATIC_ROOT = BASE_DIR / 'static'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# from manage.py check --deploy
+# deploy
 if not dev:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_HSTS_SECONDS = 3600
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+    CSRF_TRUSTED_ORIGINS = [f'https://{i}' for i in ALLOWED_HOSTS]
+# develop
 else:
     INTERNAL_IPS = ['127.0.0.1']
