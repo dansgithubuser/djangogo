@@ -11,7 +11,7 @@ COPY {proj_name} ./{proj_name}
 COPY do.py .
 COPY {app_name} ./{app_name}
 COPY git-state.txt .
-RUN ./do.py m -- collectstatic --no-input
+RUN ./do.py --env prod m -- collectstatic --no-input
 
 EXPOSE {port}
 
