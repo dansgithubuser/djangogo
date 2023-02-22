@@ -131,6 +131,9 @@ render_template('base.html', f'{args.app_name}/templates/base.html', subs)
 render_template('home.html', f'{args.app_name}/templates/home.html')
 render_template('login.html', f'{args.app_name}/templates/registration/login.html')
 
+# admin
+render_template('admin.py', f'{args.app_name}/admin.py', subs)
+
 # do.py
 render_template('do.py', subs=subs)
 os.chmod('do.py', 0o775)
